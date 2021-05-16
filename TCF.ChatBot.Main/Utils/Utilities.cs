@@ -11,19 +11,16 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using TCF.ChatBot.Main.Domain;
 
 namespace TCF.ChatBot.Main.Utils
 {
     public static class Utilities
     {
-        private static string GreenColor { get; } = "#06d756";
-        private static string GreenColor2 { get; } = "#09d757";
-        private static string BottomColor { get; } = "#f0f0f0";
-        private static string GreyColor1 { get; } = "#919191";
-        private static string GreyColor2 { get; } = "#919191";
-        private static decimal windowLayoutRate { get; } = 120;
-        private static decimal increaseRate { get; set; } = (windowLayoutRate / 100) - 1;
+        public static List<string> ListGreetingsWords { get; set; } = new List<string>() { "OLA", "OI", "BOM DIA", "BOA TARDE", "BOA NOITE" };
+        public static List<string> ListRequiredWords { get; set; } = new List<string>() { "HOW" };
+
+        //Relative to resolution of the screen (...100% / 125% / 150%...)
+        private static float increaseRate { get; set; } = 0;
 
         private const UInt32 MOUSEEVENTF_LEFTDOWN = 0X0002;
         private const UInt32 MOUSEEVENTF_LEFTUP = 0X0004;
@@ -54,6 +51,9 @@ namespace TCF.ChatBot.Main.Utils
 
             float ScreenScalingFactor = (float)PhysicalScreenHeight / (float)LogicalScreenHeight;
 
+            //Get relative rate of approximation
+            increaseRate = (ScreenScalingFactor - 1f) / (ScreenScalingFactor / 1f);
+
             return ScreenScalingFactor; // 1.25 = 125%
         }
 
@@ -68,8 +68,8 @@ namespace TCF.ChatBot.Main.Utils
         public static Bitmap CaptureScreen()
         {
             var currentDPI = GetScalingFactor();
-            var width = (int)(Screen.PrimaryScreen.Bounds.Width * currentDPI);
-            var height = (int)(Screen.PrimaryScreen.Bounds.Height * currentDPI);
+            var width = (int)(SystemInformation.VirtualScreen.Width * currentDPI);
+            var height = (int)(SystemInformation.VirtualScreen.Height * currentDPI);
             Bitmap screenCapture = new Bitmap(width, height);
             Graphics graphic = Graphics.FromImage(screenCapture);
 
@@ -180,112 +180,9 @@ namespace TCF.ChatBot.Main.Utils
             return coordinates;
         }
 
-        //        public static Coordinates SearchGreenButton()
-        //        {
-        //            //Instance of a new object
-        //            Coordinates coordinates = new Coordinates();
-
-        //            try
-        //            {
-        //                var winWidth = SystemInformation.VirtualScreen.Width;
-        //                var winHeight = SystemInformation.VirtualScreen.Height;
-        //                var winPosX = 78;
-        //                var winPosY = 0;
-
-        //                //Percentage of layout scale (125%, 100%, etc)
-
-        //                //Create an empty bitmap with the size of all connected screens
-        //                Bitmap bitmap = new Bitmap(winWidth, winHeight);
-
-        //                //Create a new graphic object that can capture the screen
-        //                Graphics graphics = Graphics.FromImage(bitmap as Image);
-
-        //                //Screenshot moment > screen content to graphics object
-        //                graphics.CopyFromScreen(winPosX, winPosY, 0, 0, bitmap.Size);
-
-        //#if DEBUG
-        //                bitmap.Save($@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\screen.png");
-        //#endif
-        //                //e.g translate #ffffff to a Color object
-        //                Color desiredPixelColor = ColorTranslator.FromHtml(GreenColor);
-        //                Color desiredPixelColor2 = ColorTranslator.FromHtml(GreenColor2);
-
-        //                for (int x = 0; x < winWidth; x++)
-        //                {
-        //                    for (int y = 0; y < winHeight; y++)
-        //                    {
-        //                        //Get current pixels color
-        //                        Color currentPixelColor = bitmap.GetPixel(x, y);
-        //                        //Console.WriteLine(currentPixelColor.Name);
-        //                        if (desiredPixelColor.Name == currentPixelColor.Name ||
-        //                            desiredPixelColor2.Name == currentPixelColor.Name ||
-        //                            (currentPixelColor.R <= 9 && currentPixelColor.G >= 215 && currentPixelColor.B <= 87))
-        //                        {
-        //                            //MessageBox.Show($"Found pixel at {x}, {y}");
-        //                            coordinates.X = x + 78;
-        //                            coordinates.Y = y;
-        //                            return coordinates;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            catch (Exception ex)
-        //            { }
-
-        //            return coordinates;
-        //        }
-
-        //public static Coordinates SearchClipButton(Coordinates prevCoordinates)
-        //{
-        //    //Reference of previous coordinates
-        //    Coordinates coordinates = new Coordinates();
-
-        //    try
-        //    {
-        //        var initialX = 55;
-        //        var initialY = 0;
-        //        coordinates.X = prevCoordinates.X + initialX;
-        //        coordinates.Y = prevCoordinates.Y + initialY;
-
-        //        //Find bottom field coordinates
-        //        coordinates = SearchColor(BottomColor, 1, SystemInformation.VirtualScreen.Height, coordinates.X, coordinates.Y);
-        //        initialY = coordinates.Y;
-
-        //        //Return clip field coordinates according to last position
-        //        coordinates = SearchColor(GreyColor1, 70, 70, coordinates.X + 65, coordinates.Y, true);
-        //    }
-        //    catch (Exception ex)
-        //    { }
-
-        //    return coordinates;
-        //}
-        //public static Tuple<int, int> SearchClipButton(Tuple<int, int> prevTuple)
-        //{
-        //    //Reference of previous coordinates
-        //    Tuple<int, int> coordinates = new Tuple<int, int>(-1, -1);
-
-        //    try
-        //    {
-        //        var initialX = 55;
-        //        var initialY = 0;
-        //        coordinates = new Tuple<int, int>(prevTuple.Item1 + initialX, prevTuple.Item2 + initialY);
-
-        //        //Find bottom field coordinates
-        //        coordinates = SearchColor(BottomColor, 1, SystemInformation.VirtualScreen.Height, coordinates.Item1, coordinates.Item2);
-        //        initialY = coordinates.Item2;
-
-        //        //Return clip field coordinates according to last position
-        //        coordinates = SearchColor(GreyColor1, 70, 70, coordinates.Item1 + 65, coordinates.Item2, true);
-        //    }
-        //    catch (Exception ex)
-        //    { }
-
-        //    return coordinates;
-        //}
-
         public static int GetEquivalent(int val)
         {
-            return decimal.ToInt32(val - ((val) * increaseRate));
+            return decimal.ToInt32(val - ((val) * (decimal)increaseRate));
         }
 
         public static void Click(int x, int y, int times = 1)
@@ -295,9 +192,9 @@ namespace TCF.ChatBot.Main.Utils
             for (int i = 0; i < times; i++)
             {
                 mouse_event(MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
-                System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+                Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
                 mouse_event(MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
-                System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+                Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
             }
         }
 
@@ -308,38 +205,45 @@ namespace TCF.ChatBot.Main.Utils
             for (int i = 0; i < times; i++)
             {
                 mouse_event(MOUSEEVENTF_RIGHTDOWN, 0, 0, 0, 0);
-                System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+                Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
                 mouse_event(MOUSEEVENTF_RIGHTUP, 0, 0, 0, 0);
-                System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+                Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
             }
         }
 
         public static void SendCtrlC()
         {
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
             SendKeys.SendWait("^(c)");
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
         }
 
         public static void SendCtrlV()
         {
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
             SendKeys.SendWait("^(v)");
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
         }
 
         public static void SendCtrlA()
         {
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
             SendKeys.SendWait("^(a)");
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
         }
 
         public static void SendEnter()
         {
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
             SendKeys.SendWait("{ENTER}");
-            System.Threading.Thread.Sleep(TimeSpan.FromMilliseconds(1));
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
+        }
+
+        public static void SendShiftEnter()
+        {
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
+            SendKeys.SendWait("+{ENTER}");
+            Task.Delay(TimeSpan.FromMilliseconds(10)).Wait();
         }
 
         public static void SendText(string text)
